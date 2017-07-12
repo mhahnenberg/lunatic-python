@@ -656,6 +656,14 @@ LUA_API int luaopen_python(lua_State *L)
         PyDict_SetItemString(maind, "lua", luam);
         Py_DECREF(luam);
     }
+#if defined(__linux__)
+    // Make sure lua symbols are globally visible. This effectively
+    // does an LD_PRELOAD. For whatever reason, some machines don't
+    // correctly link/load the liblua library. This hack seems 
+    // sufficient to allow us to move on with our lives since we 
+    // only really depend on this for mockredis/tests/jenkins.
+    dlopen("liblua5.2.so", RTLD_NOW | RTLD_GLOBAL);
+#endif
 
     /* Register 'none' */
     rc = py_convert_custom(L, Py_None, 0);
